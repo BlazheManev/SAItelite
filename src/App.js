@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import MenuBar from './components/MenuBar';  // Import MenuBar
-import Satellites from './components/Satellite/SatellitesComponents';  // Import Satellites Component
+import Satellites from './components/Satellite/SatellitesComponent';  // Import Satellites Component
 
 function App() {
   const [currentView, setCurrentView] = useState("track"); // Default to "track" view
