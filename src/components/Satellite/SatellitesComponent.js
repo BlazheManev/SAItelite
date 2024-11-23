@@ -9,14 +9,16 @@ import "./SatellitesComponent.css"; // Import the new styles
 
 const EARTH_RADIUS_KM = 6371; // Earth's radius in km
 const SAT_SIZE = 2.7; // Satellite size in km (for rendering)
-const TIME_STEP = 3000; // Time step in ms for animation
 
 const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
   const [satData, setSatData] = useState([]); // Satellites fetched from CelesTrak
   const [time, setTime] = useState(new Date()); // Current time for propagation
   const [sliderValue, setSliderValue] = useState(0); // Time adjustment in minutes (-120 to 120)
   const [addedSatellites, setAddedSatellites] = useState([]); // Track new satellites
-
+  const [fetchAllSatellites, setFetchAllSatellites] = useState(true); // State to toggle fetching all satellites
+  const TIME_STEP = useMemo(() => {
+    return fetchAllSatellites ? 3000 : 30000000; // 30 million ms if fetchAllSatellites, otherwise 3000 ms
+  }, [fetchAllSatellites]);
   // Adjust time based on the slider value
   useEffect(() => {
     const adjustedTime = new Date(time); // Use current time as the base
@@ -26,6 +28,8 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
 
   // Automatically progress time if slider isn't in use
   useEffect(() => {
+    const TIME_STEP = fetchAllSatellites ? 30000000 : 3000 ; // Recalculate based on the state
+    
     const ticker = setInterval(() => {
       setTime((prevTime) => {
         if (sliderValue === 0) { // Only auto-progress time if sliderValue is at 0
@@ -34,9 +38,9 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
         return prevTime; // If the slider is being used, prevent automatic progression
       });
     }, TIME_STEP);
-
+  
     return () => clearInterval(ticker); // Cleanup on unmount
-  }, [sliderValue]); // Depend on sliderValue so auto-progress is paused when slider is in use
+  }, [sliderValue, fetchAllSatellites]);
 
   const createSatObject = (isNew) => {
     const geometry = new THREE.OctahedronGeometry(SAT_SIZE / 2, 0);
@@ -113,10 +117,15 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
     }
   };
 
+  // Toggle function for the button
+  const toggleFetchSatellites = () => {
+    setFetchAllSatellites((prevState) => !prevState);
+  };
+
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       {/* Satellite Data Provider */}
-      <SatelliteDataProvider onDataUpdate={setSatData} />
+      <SatelliteDataProvider onDataUpdate={setSatData} fetchAllSatellites={fetchAllSatellites} />
 
       {/* Earth Component */}
       <Earth objectsData={objectsData} time={time} />
@@ -154,6 +163,23 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
           <AddSatelliteForm onAddSatellite={handleAddSatellite} />
         </div>
       )}
+
+      {/* Button to toggle satellite fetch */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "100px",
+          left: "10px",
+          zIndex: 10,
+          padding: "10px",
+          backgroundColor: "rgba(0, 0, 0, 0.8)",
+          color: "white",
+          cursor: "pointer",
+        }}
+        onClick={toggleFetchSatellites}
+      >
+        {fetchAllSatellites ? "All Satellites" : "Small Amount Of Satellites"}
+      </div>
     </div>
   );
 };
