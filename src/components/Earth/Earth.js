@@ -25,7 +25,6 @@ const Earth = ({ objectsData, time }) => {
           backgroundColor: "rgba(200, 200, 200, 0.1)",
         }}
       >
-        Time: {time.toISOString()}
       </div>
     </div>
   );
