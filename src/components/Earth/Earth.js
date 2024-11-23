@@ -5,7 +5,7 @@ import * as THREE from "three";
 import axios from "axios";
 
 const EARTH_RADIUS_KM = 6371; // Earth's radius in km
-const SAT_SIZE = 300; // Satellite size in km (for rendering)
+const SAT_SIZE = 120; // Satellite size in km (for rendering)
 const TIME_STEP = 3000; // Time step in ms for animation
 
 const EarthWithSatellites = () => {
