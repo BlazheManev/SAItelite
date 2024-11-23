@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
-import MenuBar from './components/MenuBar';  // Import MenuBar
-import Satellites from './components/Satellite/SatellitesComponent';  // Import Satellites Component
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import MenuBar from './components/MenuBar'; // Import MenuBar
+import Satellites from './components/Satellite/SatellitesComponent'; // Import Satellites Component
 
 function App() {
-  const [currentView, setCurrentView] = useState("track"); // Default to "track" view
   const [showAddSatelliteForm, setShowAddSatelliteForm] = useState(false); // Track visibility of the form
   const [activeSatellites, setActiveSatellites] = useState([]); // Track active satellites
-
-  const handleNavigate = (view) => {
-    setCurrentView(view);
-  };
 
   const toggleAddSatelliteForm = () => {
     setShowAddSatelliteForm(!showAddSatelliteForm); // Toggle visibility
@@ -20,17 +16,33 @@ function App() {
   };
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
-      <MenuBar 
-        onNavigate={handleNavigate} 
-        showAddSatelliteForm={showAddSatelliteForm} 
-        toggleAddSatelliteForm={toggleAddSatelliteForm} 
-        activeSatellites={activeSatellites} 
-      />
+    <Router>
+      <div style={{ width: '100%', height: '100%' }}>
+        {/* MenuBar remains constant across all routes */}
+        <MenuBar
+          showAddSatelliteForm={showAddSatelliteForm}
+          toggleAddSatelliteForm={toggleAddSatelliteForm}
+        />
 
-      {currentView === "track" && <Satellites showAddSatelliteForm={showAddSatelliteForm} toggleAddSatelliteForm={toggleAddSatelliteForm} onSatelliteUsed={handleSatelliteUsed} />}
-      {currentView === "add" && <Satellites showAddSatelliteForm={showAddSatelliteForm} toggleAddSatelliteForm={toggleAddSatelliteForm} onSatelliteUsed={handleSatelliteUsed} />}
-    </div>
+        {/* Define routes */}
+        <Routes>
+          {/* Default route redirects to /track */}
+          <Route path="/" element={<Navigate to="/track" replace />} />
+
+          {/* Track Satellites Route */}
+          <Route
+            path="/track"
+            element={
+              <Satellites
+                showAddSatelliteForm={showAddSatelliteForm}
+                toggleAddSatelliteForm={toggleAddSatelliteForm}
+                onSatelliteUsed={handleSatelliteUsed}
+              />
+            }
+          />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

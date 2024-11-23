@@ -1,28 +1,26 @@
 import React from 'react';
+import { Link } from 'react-router-dom'; // Import Link for navigation
 
-const MenuBar = ({ onNavigate, showAddSatelliteForm, toggleAddSatelliteForm }) => {
+const MenuBar = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
   return (
     <div style={styles.menuBar}>
       <div style={styles.buttonsContainer}>
-        <button style={styles.menuButton} onClick={() => onNavigate("track")}>
-          Track Satellites
-        </button>
+        {/* Links replace manual navigation */}
+        <Link to="/track" style={{ textDecoration: 'none' }}>
+          <button style={styles.menuButton}>Track Satellites</button>
+        </Link>
         <button
           style={styles.menuButton}
-          onClick={() => {
-            toggleAddSatelliteForm(); // Toggle the form visibility
-            onNavigate("add"); // Switch view to add satellite
-          }}
+          onClick={toggleAddSatelliteForm}
         >
           {showAddSatelliteForm ? 'Hide Add Satellite Form' : 'Add Satellite'}
         </button>
       </div>
 
-      {/* Legend at Top-Right */}
+      {/* Legend */}
       <div style={styles.legend}>
-        <span style={{ ...styles.legendItem, color: "red" }}>● Debris</span>
-       {/* <span style={{ ...styles.legendItem, color: "orange" }}>● New</span>  */}
-        <span style={{ ...styles.legendItem, color: "palegreen" }}>● Satellite</span>
+        <span style={{ ...styles.legendItem, color: 'red' }}>● Debris</span>
+        <span style={{ ...styles.legendItem, color: 'palegreen' }}>● Satellite</span>
       </div>
     </div>
   );
@@ -35,11 +33,11 @@ const styles = {
     left: '0',
     width: '100%',
     display: 'flex',
-    justifyContent: 'space-between', // Space between buttons and legend
+    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     padding: '10px',
-    zIndex: 999, // Ensure it is above other elements
+    zIndex: 999,
   },
   buttonsContainer: {
     display: 'flex',
@@ -56,8 +54,8 @@ const styles = {
   legend: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px', // Spacing between legend items
-    marginRight: '10px', // Adjust margin for spacing from the edge
+    gap: '10px',
+    marginRight: '10px',
   },
   legendItem: {
     fontSize: '14px',

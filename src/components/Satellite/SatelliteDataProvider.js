@@ -40,6 +40,26 @@ const SatelliteDataProvider = ({ onDataUpdate, fetchAllSatellites }) => {
               satrec,
             });
           }
+
+          for (const url of DEBRIS_URLs) {
+            const response = await axios.get(url);
+            const tleArray = response.data.trim().split("\n");
+    
+            // Process the TLE data
+            for (let i = 0; i < tleArray.length; i += 3) {
+              const name = tleArray[i].trim();
+              const tle1 = tleArray[i + 1].trim();
+              const tle2 = tleArray[i + 2].trim();
+    
+              const satrec = satellite.twoline2satrec(tle1, tle2);
+    
+              allSatellites.push({
+                name,
+                satrec,
+                isDebris: true // Marking debris satellites
+              });
+            }
+          }
         } else {
           // If not fetching all satellites, loop through each category and fetch TLE data
           for (const category of tleCategories) {
@@ -61,26 +81,6 @@ const SatelliteDataProvider = ({ onDataUpdate, fetchAllSatellites }) => {
             }
           }
         }
-        for (const url of DEBRIS_URLs) {
-
-        const response = await axios.get(url);
-        const tleArray = response.data.trim().split("\n");
-
-        // Process the TLE data
-        for (let i = 0; i < tleArray.length; i += 3) {
-          const name = tleArray[i].trim();
-          const tle1 = tleArray[i + 1].trim();
-          const tle2 = tleArray[i + 2].trim();
-
-          const satrec = satellite.twoline2satrec(tle1, tle2);
-
-          allSatellites.push({
-            name,
-            satrec,
-            isDebris: true // Marking debris satellites
-          });
-        }
-      }
 
       onDataUpdate(allSatellites);
       } catch (error) {
