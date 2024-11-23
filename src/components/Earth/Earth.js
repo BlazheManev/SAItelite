@@ -5,7 +5,7 @@ import * as THREE from "three";
 import axios from "axios";
 
 const EARTH_RADIUS_KM = 6371; // Earth's radius in km
-const SAT_SIZE = 500; // Satellite size in km (for rendering)
+const SAT_SIZE = 300; // Satellite size in km (for rendering)
 const TIME_STEP = 3000; // Time step in ms for animation
 
 const EarthWithSatellites = () => {
@@ -15,41 +15,47 @@ const EarthWithSatellites = () => {
   const [time, setTime] = useState(new Date());
 
   // Fetch Satellite TLE data dynamically
+  const tleCategories = [
+    "weather.txt",
+    "gps-ops.txt",
+    "amateur.txt",
+    // Add other categories as needed
+  ];
+
+  // Fetch Satellite TLE data dynamically from multiple categories
   useEffect(() => {
     const fetchSatelliteData = async () => {
+      const allSatellites = [];
+
       try {
-        const response = await axios.get(
-          "https://celestrak.com/NORAD/elements/weather.txt"
-        );
-        console.log(response.data);  // Log raw data to inspect
-  
-        // Clean up TLE data and parse correctly
-        const tleArray = response.data.trim().split("\n");
-        const satelliteBlocks = [];
-  
-        // Loop over the TLE array in blocks of 3 lines
-        for (let i = 0; i < tleArray.length; i += 3) {
-          const name = tleArray[i].trim();  // Satellite name
-          const tle1 = tleArray[i + 1].trim();  // TLE line 1
-          const tle2 = tleArray[i + 2].trim();  // TLE line 2
-  
-          // Create satellite data object
-          const satrec = satellite.twoline2satrec(tle1, tle2);  // Create satellite record from TLE lines
-  
-          satelliteBlocks.push({
-            name,
-            satrec,
-          });
+        // Fetch data for each category
+        for (const category of tleCategories) {
+          const response = await axios.get(`https://celestrak.com/NORAD/elements/${category}`);
+          const tleArray = response.data.trim().split("\n");
+
+          // Process each block of 3 lines (name, TLE line 1, TLE line 2)
+          for (let i = 0; i < tleArray.length; i += 3) {
+            const name = tleArray[i].trim();
+            const tle1 = tleArray[i + 1].trim();
+            const tle2 = tleArray[i + 2].trim();
+
+            // Assuming you have the satellite.js library for parsing TLE
+            const satrec = satellite.twoline2satrec(tle1, tle2);
+
+            allSatellites.push({
+              name,
+              satrec,
+            });
+          }
         }
-  
-        console.log(satelliteBlocks);  // Log parsed satellite data
-  
-        setSatData(satelliteBlocks); // Set the parsed satellite data
+
+        // Set the parsed satellite data
+        setSatData(allSatellites);
       } catch (error) {
         console.error("Error fetching satellite data:", error);
       }
     };
-  
+
     fetchSatelliteData();
   }, []);
 
