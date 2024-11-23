@@ -15,6 +15,7 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
   const [satData, setSatData] = useState([]); // Satellites fetched from CelesTrak
   const [time, setTime] = useState(new Date()); // Current time for propagation
   const [sliderValue, setSliderValue] = useState(0); // Time adjustment in minutes (-120 to 120)
+  const [addedSatellites, setAddedSatellites] = useState([]); // Track new satellites
 
   // Adjust time based on the slider value
   useEffect(() => {
@@ -51,8 +52,10 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
   // Calculate satellite positions based on time
   const objectsData = useMemo(() => {
     const gmst = satellite.gstime(time); // Greenwich Mean Sidereal Time
-    return satData
-      .map((sat) => {
+
+    // Combine `satData` and `addedSatellites` for rendering
+    const allSatellites = [
+      ...satData.map((sat) => {
         if (sat.satrec) {
           const eci = satellite.propagate(sat.satrec, time); // Get ECI position
           if (eci.position) {
@@ -71,9 +74,20 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
           }
         }
         return null;
-      })
-      .filter(Boolean);
-  }, [satData, time]);
+      }).filter(Boolean), // Filter invalid satellites
+
+      // Add addedSatellites (static satellites)
+      ...addedSatellites.map((sat) => ({
+        name: sat.name,
+        lat: sat.lat, // Static latitude
+        lng: sat.lng, // Static longitude
+        alt: sat.alt, // Static altitude
+        threeObject: createSatObject(true),
+      })),
+    ];
+
+    return allSatellites;
+  }, [satData, addedSatellites, time]);
 
   // Function to handle adding a new satellite
   const handleAddSatellite = (newSatellite) => {
@@ -86,7 +100,8 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
       const longitude = satellite.radiansToDegrees(geodetic.longitude);
       const altitude = geodetic.height / EARTH_RADIUS_KM;
 
-      setSatData((prevAdded) => [
+      // Add the new satellite to the addedSatellites state
+      setAddedSatellites((prevAdded) => [
         ...prevAdded,
         {
           ...newSatellite,
@@ -108,31 +123,30 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
 
       {/* Time Slider */}
       <div
-  style={{
-    position: "absolute",
-    bottom: "20px", // Move it up a bit (from bottom)
-    left: 0,
-    right: 0,
-    zIndex: 10,
-    padding: "20px 20px", // Add more padding to the top
-    background: "rgba(0, 0, 0, 0.8)",
-  }}
->
-  <div style={{ color: "white", marginBottom: "5px", textAlign: "center" }}>
-    Adjust Time: {sliderValue > 0 ? `+${sliderValue}` : sliderValue} minutes
-  </div>
-  <ReactSlider
-    value={sliderValue}
-    onChange={(value) => setSliderValue(value)}
-    min={-120} // Range: 2 hours back
-    max={120} // Range: 2 hours forward
-    step={1}
-    className="slider"
-    thumbClassName="thumb"
-    trackClassName="track"
-  />
-</div>
-
+        style={{
+          position: "absolute",
+          bottom: "20px", // Move it up a bit (from bottom)
+          left: 0,
+          right: 0,
+          zIndex: 10,
+          padding: "20px 20px", // Add more padding to the top
+          background: "rgba(0, 0, 0, 0.8)",
+        }}
+      >
+        <div style={{ color: "white", marginBottom: "5px", textAlign: "center" }}>
+          Adjust Time: {sliderValue > 0 ? `+${sliderValue}` : sliderValue} minutes
+        </div>
+        <ReactSlider
+          value={sliderValue}
+          onChange={(value) => setSliderValue(value)}
+          min={-120} // Range: 2 hours back
+          max={120} // Range: 2 hours forward
+          step={1}
+          className="slider"
+          thumbClassName="thumb"
+          trackClassName="track"
+        />
+      </div>
 
       {/* Add Satellite Form */}
       {showAddSatelliteForm && (
