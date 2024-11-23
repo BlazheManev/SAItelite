@@ -1,4 +1,3 @@
-// AddSatelliteForm.js
 import React, { useState } from "react";
 import * as satellite from "satellite.js";
 
@@ -26,7 +25,7 @@ const AddSatelliteForm = ({ onAddSatellite }) => {
         isNew: true, // Mark it as a new satellite (static)
       };
 
-      onAddSatellite(newSatellite);
+      onAddSatellite(newSatellite); // Send the satellite object to parent
 
       // Clear the form
       setSatelliteName("");

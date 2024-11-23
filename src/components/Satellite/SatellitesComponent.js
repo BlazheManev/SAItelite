@@ -1,4 +1,3 @@
-// Satellites.js
 import React, { useState, useEffect, useMemo } from "react";
 import Earth from "../Earth/Earth"; // Assuming this is your Earth component
 import SatelliteDataProvider from "./SatelliteDataProvider";
@@ -42,31 +41,63 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
   const objectsData = useMemo(() => {
     const gmst = satellite.gstime(time); // Greenwich Mean Sidereal Time
 
-    return [...satData, ...addedSatellites].map((sat) => {
-      if (sat.satrec) {
-        const eci = satellite.propagate(sat.satrec, time); // Get ECI position
-        if (eci.position) {
-          const geodetic = satellite.eciToGeodetic(eci.position, gmst);
-          const latitude = satellite.radiansToDegrees(geodetic.latitude);
-          const longitude = satellite.radiansToDegrees(geodetic.longitude);
-          const altitude = geodetic.height / EARTH_RADIUS_KM;
+    // Combine `satData` and `addedSatellites` for rendering
+    const allSatellites = [
+      ...satData.map((sat) => {
+        if (sat.satrec) {
+          const eci = satellite.propagate(sat.satrec, time); // Get ECI position
+          if (eci.position) {
+            const geodetic = satellite.eciToGeodetic(eci.position, gmst);
+            const latitude = satellite.radiansToDegrees(geodetic.latitude);
+            const longitude = satellite.radiansToDegrees(geodetic.longitude);
+            const altitude = geodetic.height / EARTH_RADIUS_KM;
 
-          return {
-            name: sat.name,
-            lat: latitude,
-            lng: longitude,
-            alt: altitude,
-            threeObject: createSatObject(sat.isNew),
-          };
+            return {
+              name: sat.name,
+              lat: latitude,
+              lng: longitude,
+              alt: altitude,
+              threeObject: createSatObject(false),
+            };
+          }
         }
-      }
-      return null;
-    }).filter(Boolean); // Filter invalid satellites
+        return null;
+      }).filter(Boolean), // Filter invalid satellites
+
+      // Add stationary satellites
+      ...addedSatellites.map((sat) => ({
+        name: sat.name,
+        lat: sat.lat, // Static latitude
+        lng: sat.lng, // Static longitude
+        alt: sat.alt, // Static altitude
+        threeObject: createSatObject(true),
+      })),
+    ];
+
+    return allSatellites;
   }, [satData, addedSatellites, time]);
 
   // Handle adding new satellite
   const handleAddSatellite = (newSatellite) => {
-    setAddedSatellites((prevSatellites) => [...prevSatellites, newSatellite]);
+    const gmst = satellite.gstime(time); // Get GMST for geodetic conversion
+    const eci = satellite.propagate(newSatellite.satrec, time); // Get initial position
+
+    if (eci.position) {
+      const geodetic = satellite.eciToGeodetic(eci.position, gmst);
+      const latitude = satellite.radiansToDegrees(geodetic.latitude);
+      const longitude = satellite.radiansToDegrees(geodetic.longitude);
+      const altitude = geodetic.height / EARTH_RADIUS_KM;
+
+      setAddedSatellites((prevAdded) => [
+        ...prevAdded,
+        {
+          ...newSatellite,
+          lat: latitude,
+          lng: longitude,
+          alt: altitude,
+        },
+      ]);
+    }
   };
 
   return (
