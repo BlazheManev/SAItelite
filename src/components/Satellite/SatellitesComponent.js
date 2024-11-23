@@ -16,9 +16,12 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
   const [sliderValue, setSliderValue] = useState(0); // Time adjustment in minutes (-120 to 120)
   const [addedSatellites, setAddedSatellites] = useState([]); // Track new satellites
   const [fetchAllSatellites, setFetchAllSatellites] = useState(true); // State to toggle fetching all satellites
+  const [loading, setLoading] = useState(true); // Track loading state
+
   const TIME_STEP = useMemo(() => {
     return fetchAllSatellites ? 3000 : 30000000; // 30 million ms if fetchAllSatellites, otherwise 3000 ms
   }, [fetchAllSatellites]);
+
   // Adjust time based on the slider value
   useEffect(() => {
     const adjustedTime = new Date(time); // Use current time as the base
@@ -28,8 +31,8 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
 
   // Automatically progress time if slider isn't in use
   useEffect(() => {
-    const TIME_STEP = fetchAllSatellites ? 30000000 : 3000 ; // Recalculate based on the state
-    
+    const TIME_STEP = fetchAllSatellites ? 30000000 : 3000; // Recalculate based on the state
+
     const ticker = setInterval(() => {
       setTime((prevTime) => {
         if (sliderValue === 0) { // Only auto-progress time if sliderValue is at 0
@@ -38,7 +41,7 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
         return prevTime; // If the slider is being used, prevent automatic progression
       });
     }, TIME_STEP);
-  
+
     return () => clearInterval(ticker); // Cleanup on unmount
   }, [sliderValue, fetchAllSatellites]);
 
@@ -122,6 +125,13 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
     setFetchAllSatellites((prevState) => !prevState);
   };
 
+  // Set loading to false once data is fetched
+  useEffect(() => {
+    if (satData.length > 0) {
+      setLoading(false);
+    }
+  }, [satData]);
+
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       {/* Satellite Data Provider */}
@@ -129,6 +139,23 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
 
       {/* Earth Component */}
       <Earth objectsData={objectsData} time={time} />
+
+      {/* Show loading indicator if data is not yet loaded */}
+      {loading && (
+        <div style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          color: "white",
+          fontSize: "24px",
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          padding: "10px",
+          borderRadius: "5px",
+        }}>
+          Loading Satellites...
+        </div>
+      )}
 
       {/* Time Slider */}
       <div
