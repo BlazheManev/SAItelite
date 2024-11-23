@@ -68,7 +68,6 @@ const EarthWithSatellites = () => {
     return () => clearInterval(ticker); // Cleanup on unmount
   }, []);
 
-  // Function to create a unique satellite object
   const createSatObject = () => {
     if (!globeRadius) return null;
 
