@@ -9,7 +9,12 @@ const SatelliteDataProvider = ({ onDataUpdate, fetchAllSatellites }) => {
     "amateur.txt",
     // Add more categories as needed
   ];
-
+  const DEBRIS_URLs = [
+    `https://celestrak.org/NORAD/elements/gp.php?GROUP=cosmos-2251-debris&FORMAT=tle`,
+    `https://celestrak.org/NORAD/elements/gp.php?GROUP=cosmos-1408-debris&FORMAT=tle`,
+    `https://celestrak.org/NORAD/elements/gp.php?GROUP=iridium-33-debris&FORMAT=tle`,
+  `https://celestrak.org/NORAD/elements/gp.php?GROUP=fengyun-1c-debris&FORMAT=tle`
+  ];
   useEffect(() => {
     // Function to fetch satellite data
     const fetchSatelliteData = async () => {
@@ -56,9 +61,28 @@ const SatelliteDataProvider = ({ onDataUpdate, fetchAllSatellites }) => {
             }
           }
         }
+        for (const url of DEBRIS_URLs) {
 
-        // Notify parent component about the updated data
-        onDataUpdate(allSatellites);
+        const response = await axios.get(url);
+        const tleArray = response.data.trim().split("\n");
+
+        // Process the TLE data
+        for (let i = 0; i < tleArray.length; i += 3) {
+          const name = tleArray[i].trim();
+          const tle1 = tleArray[i + 1].trim();
+          const tle2 = tleArray[i + 2].trim();
+
+          const satrec = satellite.twoline2satrec(tle1, tle2);
+
+          allSatellites.push({
+            name,
+            satrec,
+            isDebris: true // Marking debris satellites
+          });
+        }
+      }
+
+      onDataUpdate(allSatellites);
       } catch (error) {
         console.error("Error fetching satellite data:", error);
       }

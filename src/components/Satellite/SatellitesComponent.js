@@ -45,10 +45,10 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
     return () => clearInterval(ticker); // Cleanup on unmount
   }, [sliderValue, fetchAllSatellites]);
 
-  const createSatObject = (isNew) => {
+  const createSatObject = (isNew, isDebris) => {
     const geometry = new THREE.OctahedronGeometry(SAT_SIZE / 2, 0);
     const material = new THREE.MeshLambertMaterial({
-      color: isNew ? "orange" : "palegreen",
+      color: isDebris ? "red" : isNew ? "orange" : "palegreen", // Color debris satellites
       transparent: true,
       opacity: 0.7,
     });
@@ -76,7 +76,7 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
               lat: latitude,
               lng: longitude,
               alt: altitude,
-              threeObject: createSatObject(false),
+              threeObject: createSatObject(false, sat.isDebris),
             };
           }
         }
