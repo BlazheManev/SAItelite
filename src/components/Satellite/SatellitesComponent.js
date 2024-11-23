@@ -29,7 +29,7 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
       0
     );
     const material = new THREE.MeshLambertMaterial({
-      color: isNew ? "red" : "palegreen", // New satellites are marked in red
+      color: isNew ? "orange" : "palegreen", // New satellites are marked in red
       transparent: true,
       opacity: 0.7,
     });
