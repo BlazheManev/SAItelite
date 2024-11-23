@@ -1,12 +1,11 @@
-// src/components/EarthWithSatellites.js
-
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import Globe from "react-globe.gl";
 import * as satellite from "satellite.js";
 import * as THREE from "three";
+import axios from "axios";
 
 const EARTH_RADIUS_KM = 6371; // Earth's radius in km
-const SAT_SIZE = 160; // Satellite size in km (for rendering)
+const SAT_SIZE = 500; // Satellite size in km (for rendering)
 const TIME_STEP = 3000; // Time step in ms for animation
 
 const EarthWithSatellites = () => {
@@ -15,38 +14,44 @@ const EarthWithSatellites = () => {
   const [globeRadius, setGlobeRadius] = useState();
   const [time, setTime] = useState(new Date());
 
-  // TLE Data
-  const tleData = `
-0 VANGUARD 2
-1    11U 59001A   22053.83197560  .00000847  00000-0  45179-3 0  9996
-2    11  32.8647 264.6509 1466352 126.0358 248.5175 11.85932318689790
-0 VANGUARD 3
-1 00020U 59007A   22053.60170665  .00000832  00000-0  32375-3 0  9992
-2 00020  33.3540 150.1993 1666456 290.4879  52.4980 11.56070084301793
-0 EXPLORER 7
-1 00022U 59009A   22053.49750630  .00000970  00000-0  93426-4 0  9997
-2 00022  50.2831  94.4956 0136813  90.0531 271.6094 14.96180956562418
-  `;
-
-  // Parse TLE Data
+  // Fetch Satellite TLE data dynamically
   useEffect(() => {
-    const parsedSatData = tleData
-      .trim()
-      .split(/\n(?=0 )/) // Split by satellite block
-      .map((block) => {
-        const lines = block.trim().split("\n");
-        const name = lines[0].slice(2).trim();
-        const tle1 = lines[1].trim();
-        const tle2 = lines[2].trim();
-
-        return {
-          name,
-          satrec: satellite.twoline2satrec(tle1, tle2),
-        };
-      });
-
-    setSatData(parsedSatData);
-  }, [tleData]);
+    const fetchSatelliteData = async () => {
+      try {
+        const response = await axios.get(
+          "https://celestrak.com/NORAD/elements/weather.txt"
+        );
+        console.log(response.data);  // Log raw data to inspect
+  
+        // Clean up TLE data and parse correctly
+        const tleArray = response.data.trim().split("\n");
+        const satelliteBlocks = [];
+  
+        // Loop over the TLE array in blocks of 3 lines
+        for (let i = 0; i < tleArray.length; i += 3) {
+          const name = tleArray[i].trim();  // Satellite name
+          const tle1 = tleArray[i + 1].trim();  // TLE line 1
+          const tle2 = tleArray[i + 2].trim();  // TLE line 2
+  
+          // Create satellite data object
+          const satrec = satellite.twoline2satrec(tle1, tle2);  // Create satellite record from TLE lines
+  
+          satelliteBlocks.push({
+            name,
+            satrec,
+          });
+        }
+  
+        console.log(satelliteBlocks);  // Log parsed satellite data
+  
+        setSatData(satelliteBlocks); // Set the parsed satellite data
+      } catch (error) {
+        console.error("Error fetching satellite data:", error);
+      }
+    };
+  
+    fetchSatelliteData();
+  }, []);
 
   // Update time for satellite propagation
   useEffect(() => {
@@ -57,30 +62,8 @@ const EarthWithSatellites = () => {
     return () => clearInterval(ticker); // Cleanup on unmount
   }, []);
 
-  // Update Satellite Positions
-  const objectsData = useMemo(() => {
-    if (!satData.length) return [];
-
-    const gmst = satellite.gstime(time); // Greenwich Mean Sidereal Time
-    return satData
-      .map((sat) => {
-        const eci = satellite.propagate(sat.satrec, time); // Get ECI position
-        if (eci.position) {
-          const geodetic = satellite.eciToGeodetic(eci.position, gmst);
-          return {
-            name: sat.name,
-            lat: satellite.radiansToDegrees(geodetic.latitude),
-            lng: satellite.radiansToDegrees(geodetic.longitude),
-            alt: geodetic.height / EARTH_RADIUS_KM, // Normalize altitude
-          };
-        }
-        return null;
-      })
-      .filter(Boolean); // Filter invalid satellites
-  }, [satData, time]);
-
-  // Satellite 3D Object
-  const satObject = useMemo(() => {
+  // Function to create a unique satellite object
+  const createSatObject = () => {
     if (!globeRadius) return null;
 
     const geometry = new THREE.OctahedronGeometry(
@@ -94,7 +77,33 @@ const EarthWithSatellites = () => {
     });
 
     return new THREE.Mesh(geometry, material);
-  }, [globeRadius]);
+  };
+
+  // Calculate Satellite Positions
+  const objectsData = useMemo(() => {
+    if (!satData.length) return [];
+
+    const gmst = satellite.gstime(time); // Greenwich Mean Sidereal Time
+    const updatedObjectsData = satData
+      .map((sat) => {
+        const eci = satellite.propagate(sat.satrec, time); // Get ECI position
+        if (eci.position) {
+          const geodetic = satellite.eciToGeodetic(eci.position, gmst);
+          return {
+            name: sat.name,
+            lat: satellite.radiansToDegrees(geodetic.latitude),
+            lng: satellite.radiansToDegrees(geodetic.longitude),
+            alt: geodetic.height / EARTH_RADIUS_KM, // Normalize altitude
+            // Create a unique 3D object for each satellite
+            threeObject: createSatObject(),
+          };
+        }
+        return null;
+      })
+      .filter(Boolean); // Filter invalid satellites
+
+    return updatedObjectsData;
+  }, [satData, time]);
 
   useEffect(() => {
     if (globeEl.current) {
@@ -114,7 +123,7 @@ const EarthWithSatellites = () => {
         objectLng="lng"
         objectAltitude="alt"
         objectFacesSurface={false}
-        objectThreeObject={satObject}
+        objectThreeObject="threeObject" // Link the object to its unique 3D object
       />
       <div
         style={{
