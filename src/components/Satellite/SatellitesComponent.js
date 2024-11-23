@@ -6,7 +6,7 @@ import * as satellite from "satellite.js";
 import * as THREE from "three";
 
 const EARTH_RADIUS_KM = 6371; // Earth's radius in km
-const SAT_SIZE = 2; // Satellite size in km (for rendering)
+const SAT_SIZE = 4; // Satellite size in km (for rendering)
 const TIME_STEP = 3000; // Time step in ms for animation
 
 const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
