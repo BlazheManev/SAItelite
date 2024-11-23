@@ -16,7 +16,7 @@
   
   /* Style for the slider thumb */
   .thumb {
-    border: 6px solid #ff0000; /* Light blue border */
+    border: 6px solid #9000ff; /* Light blue border */
     border-radius: 40%; /* Circular thumb */
     cursor: grab;
     padding-bottom: -10px;
