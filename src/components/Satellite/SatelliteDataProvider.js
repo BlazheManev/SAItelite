@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from "react";
+// SatelliteDataProvider.js
+import { useEffect } from "react";
 import axios from "axios";
 import * as satellite from "satellite.js";
 
 const SatelliteDataProvider = ({ onDataUpdate }) => {
-  const [satData, setSatData] = useState([]);
-
   const tleCategories = [
     "weather.txt",
     "gps-ops.txt",
     "amateur.txt",
-    // Add other categories as needed
+    // Add more categories as needed
   ];
 
   useEffect(() => {
@@ -17,6 +16,7 @@ const SatelliteDataProvider = ({ onDataUpdate }) => {
       const allSatellites = [];
 
       try {
+        // Loop through each category and fetch TLE data
         for (const category of tleCategories) {
           const response = await axios.get(`https://celestrak.com/NORAD/elements/${category}`);
           const tleArray = response.data.trim().split("\n");
@@ -35,8 +35,8 @@ const SatelliteDataProvider = ({ onDataUpdate }) => {
           }
         }
 
-        setSatData(allSatellites);
-        onDataUpdate(allSatellites); // Notify parent component about the updated data
+        // Notify parent component about the updated data
+        onDataUpdate(allSatellites);
       } catch (error) {
         console.error("Error fetching satellite data:", error);
       }
