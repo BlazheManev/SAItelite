@@ -44,7 +44,7 @@ A next-generation solution for managing satellites autonomously, ensuring safety
 2. **Setup the Environment**  
    - Clone the repository:
      ```bash
-     git clone [<repository_url>](https://github.com/BlazheManev/SAItellite-frontend.git)
+     git clone https://github.com/BlazheManev/SAItellite-frontend.git
      cd SAItellite-frontend
      ```
    - Install dependencies:
