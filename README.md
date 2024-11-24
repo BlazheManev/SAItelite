@@ -37,7 +37,7 @@ A next-generation solution for managing satellites autonomously, ensuring safety
 
 ## How to Use
 
-3. **Live Application**  
+1. **Live Application**  
    The application is already live and accessible at:  
    [Satellite Management System](https://saitellite-frontend.onrender.com/)
 
