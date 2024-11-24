@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import MenuBar from './components/MenuBar'; // Import MenuBar
 import Satellites from './components/Satellite/SatellitesComponent'; // Import Satellites Component
+import AllSatellites from './components/Satellite/AllSatellites'; // Import the AllSatellites component
 
 function App() {
   const [showAddSatelliteForm, setShowAddSatelliteForm] = useState(false); // Track visibility of the form
@@ -40,6 +41,12 @@ function App() {
               />
             }
           />
+
+          {/* All Satellites Route */}
+          <Route
+  path="/all-satellites"
+  element={<AllSatellites />}
+/>
         </Routes>
       </div>
     </Router>

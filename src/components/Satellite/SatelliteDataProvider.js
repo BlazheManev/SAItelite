@@ -20,6 +20,7 @@ const SatelliteDataProvider = ({ onDataUpdate, fetchAllSatellites }) => {
     const fetchSatelliteData = async () => {
       // Clear previous satellite data before fetching new data
       const allSatellites = [];
+      const rawTLEData = []; // Array to hold the raw TLE data before processing
 
       try {
         // If fetching all satellites, get data from CelesTrak's active satellite list
@@ -32,8 +33,10 @@ const SatelliteDataProvider = ({ onDataUpdate, fetchAllSatellites }) => {
             const name = tleArray[i].trim();
             const tle1 = tleArray[i + 1].trim();
             const tle2 = tleArray[i + 2].trim();
+            rawTLEData.push({ name, tle1, tle2 });
 
             const satrec = satellite.twoline2satrec(tle1, tle2);
+            rawTLEData.push({ name, tle1, tle2 });
 
             allSatellites.push({
               name,
@@ -50,7 +53,8 @@ const SatelliteDataProvider = ({ onDataUpdate, fetchAllSatellites }) => {
               const name = tleArray[i].trim();
               const tle1 = tleArray[i + 1].trim();
               const tle2 = tleArray[i + 2].trim();
-    
+              rawTLEData.push({ name, tle1, tle2 });
+
               const satrec = satellite.twoline2satrec(tle1, tle2);
     
               allSatellites.push({
@@ -71,6 +75,7 @@ const SatelliteDataProvider = ({ onDataUpdate, fetchAllSatellites }) => {
               const name = tleArray[i].trim();
               const tle1 = tleArray[i + 1].trim();
               const tle2 = tleArray[i + 2].trim();
+              rawTLEData.push({ name, tle1, tle2 });
 
               const satrec = satellite.twoline2satrec(tle1, tle2);
 
@@ -81,6 +86,7 @@ const SatelliteDataProvider = ({ onDataUpdate, fetchAllSatellites }) => {
             }
           }
         }
+        localStorage.setItem("rawTLEData", JSON.stringify(rawTLEData));
 
       onDataUpdate(allSatellites);
       } catch (error) {

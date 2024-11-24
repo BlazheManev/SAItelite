@@ -29,6 +29,9 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
     setTime(adjustedTime); // Update time for propagation
   }, [sliderValue]); // Recalculate time when sliderValue changes
 
+  console.log(`Satellite-1               1 99999U 99067A   24015.17520000  .00001000  00000-0  17001-4 0  9998
+2 99999  0.0030 121.0801 0003702  15.6262  78.0874  1.00273769 00001
+`)
   // Automatically progress time if slider isn't in use
   useEffect(() => {
     const TIME_STEP = fetchAllSatellites ? 30000000 : 3000; // Recalculate based on the state
@@ -52,25 +55,25 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
       transparent: true,
       opacity: 0.7,
     });
-
+  
     return new THREE.Mesh(geometry, material);
   };
 
   // Calculate satellite positions based on time
   const objectsData = useMemo(() => {
     const gmst = satellite.gstime(time); // Greenwich Mean Sidereal Time
-
-    // Combine `satData` and `addedSatellites` for rendering
+  
+    // Combine satData and addedSatellites for rendering
     const allSatellites = [
       ...satData.map((sat) => {
         if (sat.satrec) {
-          const eci = satellite.propagate(sat.satrec, time); // Get ECI position
+          const eci = satellite.propagate(sat.satrec, time); // Propagate satellite based on TLE
           if (eci.position) {
             const geodetic = satellite.eciToGeodetic(eci.position, gmst);
             const latitude = satellite.radiansToDegrees(geodetic.latitude);
             const longitude = satellite.radiansToDegrees(geodetic.longitude);
             const altitude = geodetic.height / EARTH_RADIUS_KM;
-
+  
             return {
               name: sat.name,
               lat: latitude,
@@ -82,7 +85,7 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
         }
         return null;
       }).filter(Boolean), // Filter invalid satellites
-
+  
       // Add addedSatellites (static satellites)
       ...addedSatellites.map((sat) => ({
         name: sat.name,
@@ -92,9 +95,9 @@ const Satellites = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
         threeObject: createSatObject(true),
       })),
     ];
-
+  
     return allSatellites;
-  }, [satData, addedSatellites, time]);
+  }, [satData, addedSatellites, time]); // Ensure this recalculates when time or satellite data changes
 
   // Function to handle adding a new satellite
   const handleAddSatellite = (newSatellite) => {

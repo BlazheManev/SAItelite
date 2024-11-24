@@ -1,7 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // Import Link for navigation
+import { Link, useLocation } from 'react-router-dom'; // Import useLocation for checking current route
 
 const MenuBar = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
+  const location = useLocation();
+
+  // Determine if the current path is '/track'
+  const isOnTrackPage = location.pathname === '/track';
+
   return (
     <div style={styles.menuBar}>
       <div style={styles.buttonsContainer}>
@@ -10,11 +15,20 @@ const MenuBar = ({ showAddSatelliteForm, toggleAddSatelliteForm }) => {
           <button style={styles.menuButton}>Track Satellites</button>
         </Link>
         <button
-          style={styles.menuButton}
-          onClick={toggleAddSatelliteForm}
+          style={{
+            ...styles.menuButton,
+            cursor: isOnTrackPage ? 'pointer' : 'not-allowed',
+            opacity: isOnTrackPage ? 1 : 0.6,
+          }}
+          onClick={isOnTrackPage ? toggleAddSatelliteForm : null} // Only trigger function if on '/track'
+          disabled={!isOnTrackPage} // Disable the button if not on '/track'
         >
           {showAddSatelliteForm ? 'Hide Add Satellite Form' : 'Add Satellite'}
         </button>
+
+        <Link to="/all-satellites" style={{ textDecoration: 'none' }}>
+          <button style={styles.menuButton}>New TLE</button>
+        </Link>
       </div>
 
       {/* Legend */}
