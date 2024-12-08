@@ -6,10 +6,9 @@ A next-generation solution for managing satellites autonomously, ensuring safety
 
 Here’s a demo of the project:
 
-<video controls>
-  <source src="demo.mp4" type="video/mp4">
-  Your browser does not support the video tag. You can [download the video here](demo.mp4).
-</video>
+https://github.com/user-attachments/assets/2c2e65f7-5aab-411b-a0d7-cf3b732b17a9
+
+
 ## Core Functionalities
 
 - **Self-Driving Satellites**  
