@@ -2,9 +2,12 @@
 
 This repository contains the source code and documentation for our cutting-edge *Autonomous Satellite Management Solution*.
 A next-generation solution for managing satellites autonomously, ensuring safety, efficiency, and reduced reliance on ground operations through state-of-the-art features.
+## Demo Video
+
+Here’s a demo of the project:
+
 <video controls>
-  <source src="demo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
+  <source src="/demo.mp4" type="video/mp4">
 </video>
 ## Core Functionalities
 
